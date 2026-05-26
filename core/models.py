@@ -72,6 +72,13 @@ class InventoryItem(models.Model):
     def __str__(self):
         return f"{self.gift.name} - {self.user.username} ({self.status})"
 
+class PendingDeposit(models.Model):
+    user = models.ForeignKey(User, related_name='pending_deposits', on_delete=models.CASCADE)
+    amount_ton = models.FloatField()
+    boc = models.TextField()
+    is_processed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
 class Setting(models.Model):
     key = models.CharField(max_length=50, unique=True)
     value = models.CharField(max_length=255)

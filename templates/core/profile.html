@@ -7,10 +7,24 @@
     <p>ID: <span id="profile-id"></span></p>
 
     <div class="card" style="margin: 20px 0; text-align: left;">
-        <h3>Top Up Balance (TON)</h3>
-        <p style="color: #aaa; font-size: 12px;">Ensure your wallet is connected via the top bar.</p>
-        <input type="number" id="deposit-amount" placeholder="Amount in TON (e.g., 0.5)" step="0.1">
-        <button class="btn btn-accent" onclick="depositTON()">Deposit</button>
+        <h3>Top Up Balance</h3>
+        <p style="color: #aaa; font-size: 12px;">Top up with TON via wallet, or with Telegram Stars natively.</p>
+
+        <div style="margin-bottom: 15px;">
+            <h4>Via TON</h4>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="deposit-amount" placeholder="Amount in TON (e.g., 0.5)" step="0.1" style="margin: 0; flex: 1;">
+                <button class="btn btn-accent" onclick="depositTON()" style="margin: 0; flex: 1;">Deposit</button>
+            </div>
+        </div>
+
+        <div>
+            <h4>Via Telegram Stars</h4>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="tg-stars-amount" placeholder="Amount of Stars (e.g., 50)" step="1" style="margin: 0; flex: 1;">
+                <button class="btn" onclick="buyTelegramStars()" style="margin: 0; flex: 1; background-color: #2da5e1;">Buy Stars</button>
+            </div>
+        </div>
     </div>
 
     <h3>Inventory</h3>

@@ -56,6 +56,34 @@ def send_welcome(message):
         reply_markup=markup
     )
 
+@bot.pre_checkout_query_handler(func=lambda query: True)
+def checkout(pre_checkout_query):
+    bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
+
+@bot.message_handler(content_types=['successful_payment'])
+def got_payment(message):
+    payment_info = message.successful_payment
+    payload = payment_info.invoice_payload
+
+    # Payload format: topup_{user_id}_{amount}
+    if payload.startswith('topup_'):
+        parts = payload.split('_')
+        if len(parts) == 3:
+            user_id = parts[1]
+            amount = int(parts[2])
+
+            try:
+                from django.db import transaction
+                from django.db.models import F
+                with transaction.atomic():
+                    user = User.objects.select_for_update().get(telegram_id=user_id)
+                    user.stars_balance = F('stars_balance') + amount
+                    user.save()
+
+                bot.reply_to(message, f"🎉 Successfully added {amount} Stars to your balance!")
+            except User.DoesNotExist:
+                pass
+
 if __name__ == '__main__':
     print("Bot is running...")
     bot.infinity_polling()

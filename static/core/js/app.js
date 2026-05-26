@@ -73,68 +73,98 @@ function updateUI() {
 }
 
 // --- ROULETTE ---
+let currentRouletteId = null;
+
 async function loadRouletteList() {
     try {
         const res = await fetch('/api/roulettes/', { headers: getAuthHeaders() });
         const data = await res.json();
-        const sel = document.getElementById('roulette-selector');
-        if(!sel) return;
+        const tabs = document.getElementById('roulette-tabs');
+        if(!tabs) return;
 
-        data.roulettes.forEach(r => {
-            const opt = document.createElement('option');
-            opt.value = r.id;
-            opt.dataset.cost = r.spin_cost;
-            opt.innerText = r.name;
-            sel.appendChild(opt);
+        tabs.innerHTML = '';
+        data.roulettes.forEach((r, i) => {
+            const tab = document.createElement('div');
+            tab.className = 'roulette-tab';
+            tab.innerHTML = `<div>${escapeHTML(r.name)}</div><div style="font-size:12px; color:gold;">${r.spin_cost} ⭐</div>`;
+            tab.onclick = () => selectRoulette(r, tab);
+            tabs.appendChild(tab);
+
+            // Auto-select first
+            if(i === 0) selectRoulette(r, tab);
         });
     } catch(e) { console.error(e); }
 }
 
-function loadRoulette() {
-    const sel = document.getElementById('roulette-selector');
+function selectRoulette(r, tabElement) {
+    document.querySelectorAll('.roulette-tab').forEach(el => el.classList.remove('active'));
+    tabElement.classList.add('active');
+
+    currentRouletteId = r.id;
     const display = document.getElementById('roulette-display');
-    const val = sel.value;
-
-    if(!val) {
-        display.style.display = 'none';
-        return;
-    }
-
-    const opt = sel.options[sel.selectedIndex];
-    document.getElementById('roulette-name').innerText = opt.innerText;
-    document.getElementById('roulette-cost').innerText = opt.dataset.cost;
+    document.getElementById('roulette-name').innerText = r.name;
+    document.getElementById('roulette-cost').innerText = r.spin_cost;
     document.getElementById('spin-result').innerText = '';
+
+    // Reset wheel
+    const wheel = document.getElementById('roulette-wheel');
+    wheel.style.transition = 'none';
+    wheel.style.transform = 'translateY(0px)';
+    wheel.innerText = '🎁';
+
     display.style.display = 'block';
 }
 
 async function spinRoulette() {
-    const sel = document.getElementById('roulette-selector');
-    const rouletteId = sel.value;
+    if(!currentRouletteId) return;
     const resEl = document.getElementById('spin-result');
+    const btn = document.getElementById('spin-btn');
+    const wheel = document.getElementById('roulette-wheel');
 
-    resEl.innerText = "Spinning...";
-    resEl.style.color = "gold";
+    btn.disabled = true;
+    resEl.innerText = "";
+
+    // Start fast infinite spinning animation using CSS transform
+    wheel.style.transition = 'transform 2s cubic-bezier(0.1, 0.7, 1.0, 0.1)';
+    wheel.style.transform = `translateY(${Math.floor(Math.random() * -500) - 500}px)`;
+    wheel.innerText = '🎁\n💎\n🧸\n🚗\n💰\n🎁\n💎\n🧸\n🚗\n💰'; // Mock vertical strip
 
     try {
         const res = await fetch('/api/spin/', {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ roulette_id: rouletteId })
+            body: JSON.stringify({ roulette_id: currentRouletteId })
         });
         const data = await res.json();
 
-        if(data.error) {
-            resEl.innerText = data.error;
-            resEl.style.color = "red";
-        } else {
-            resEl.innerText = `You won: ${data.won_gift}! 🎉`;
-            resEl.style.color = "lime";
-            currentUser.stars_balance = data.new_balance;
-            updateUI();
-        }
+        // Wait for spin animation to "finish"
+        setTimeout(() => {
+            if(data.error) {
+                resEl.innerText = escapeHTML(data.error);
+                resEl.style.color = "red";
+                wheel.innerText = '❌';
+            } else {
+                wheel.style.transition = 'transform 0.5s ease-out';
+                wheel.style.transform = 'translateY(0px)';
+                wheel.innerText = '🎉';
+
+                setTimeout(() => {
+                    resEl.innerText = `You won: ${escapeHTML(data.won_gift)}! 🎉`;
+                    resEl.style.color = "lime";
+                    currentUser.stars_balance = data.new_balance;
+                    updateUI();
+                }, 500);
+            }
+            btn.disabled = false;
+        }, 2000);
+
     } catch(e) {
-        resEl.innerText = "Error spinning";
-        resEl.style.color = "red";
+        setTimeout(() => {
+            resEl.innerText = "Error spinning";
+            resEl.style.color = "red";
+            btn.disabled = false;
+            wheel.innerText = '❌';
+        }, 2000);
     }
 }
 
@@ -590,4 +620,77 @@ async function loadLeaderboard() {
     } catch (e) {
         console.error("Failed to load leaderboard", e);
     }
+}
+
+// --- TELEGRAM STARS PURCHASE ---
+async function buyTelegramStars() {
+    const amtInput = document.getElementById('tg-stars-amount').value;
+    const amount = parseInt(amtInput);
+    if (!amount || amount <= 0) {
+        tg.showAlert("Enter a valid Stars amount.");
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/stars_invoice/', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ amount })
+        });
+        const data = await res.json();
+
+        if (data.success && data.invoice_link) {
+            // Open the Telegram invoice link natively via the TWA API
+            tg.openInvoice(data.invoice_link, (status) => {
+                if(status === 'paid') {
+                    tg.showAlert("Payment successful! Your balance will be updated.");
+                    // The bot webhook handles actual crediting, we can just reload auth
+                    setTimeout(authenticateUser, 2000);
+                } else if(status === 'failed') {
+                    tg.showAlert("Payment failed.");
+                } else if(status === 'cancelled') {
+                    // Do nothing
+                }
+            });
+        } else {
+            tg.showAlert("Error creating invoice: " + (data.error || "Unknown"));
+        }
+    } catch(e) {
+        console.error(e);
+        tg.showAlert("An error occurred.");
+    }
+}
+
+async function loadAdminDeposits() {
+    const list = document.getElementById('deposits-list');
+    if(!list) return;
+    list.innerHTML = "Loading...";
+    try {
+        const res = await fetch('/api/admin/deposits/', { headers: getAuthHeaders() });
+        const data = await res.json();
+        list.innerHTML = '';
+        if(data.deposits.length === 0) { list.innerHTML = "No pending deposits."; }
+
+        data.deposits.forEach(d => {
+            list.innerHTML += `
+                <div class="card" style="margin-bottom: 10px; text-align: left;">
+                    <p><strong>User:</strong> ${escapeHTML(d.user_name)}</p>
+                    <p><strong>TON:</strong> ${d.amount_ton}</p>
+                    <p style="word-break: break-all; font-size:10px;">BOC: ${escapeHTML(d.boc)}</p>
+                    <button class="btn btn-accent" onclick="approveDeposit(${d.id})">Verify & Approve</button>
+                </div>
+            `;
+        });
+    } catch(e) { console.error(e); }
+}
+
+async function approveDeposit(id) {
+    try {
+        await fetch('/api/admin/deposits/', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ deposit_id: id })
+        });
+        loadAdminDeposits();
+    } catch(e) { console.error(e); }
 }

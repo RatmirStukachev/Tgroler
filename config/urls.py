@@ -16,6 +16,7 @@ urlpatterns = [
     # API Endpoints
     path('api/auth/', views.auth_user, name='auth_user'),
     path('api/deposit/', views.deposit_ton, name='deposit_ton'),
+    path('api/stars_invoice/', views.create_stars_invoice, name='create_stars_invoice'),
     path('api/roulettes/', views.get_roulettes, name='get_roulettes'),
     path('api/spin/', views.spin_roulette, name='spin_roulette'),
     path('api/inventory/', views.get_inventory, name='get_inventory'),
@@ -33,6 +34,7 @@ urlpatterns = [
     path('api/admin/gifts/', views.admin_manage_gifts, name='admin_gifts'),
     path('api/admin/roulettes/', views.admin_manage_roulettes, name='admin_roulettes'),
     path('api/admin/lotteries/', views.admin_manage_lotteries, name='admin_lotteries'),
+    path('api/admin/deposits/', views.admin_manage_deposits, name='admin_deposits'),
 ]
 
 if settings.DEBUG:

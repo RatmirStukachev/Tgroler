@@ -10,6 +10,7 @@
         <button class="btn" onclick="showAdminTab('gifts')">Gifts</button>
         <button class="btn" onclick="showAdminTab('roulettes')">Roulettes</button>
         <button class="btn" onclick="showAdminTab('lotteries')">Lotteries</button>
+        <button class="btn" onclick="showAdminTab('deposits')">Deposits</button>
         <button class="btn" onclick="showAdminTab('settings')">Settings</button>
     </div>
 
@@ -70,6 +71,12 @@
     </div>
 
     <!-- SETTINGS -->
+    <div id="admin-deposits" class="admin-tab" style="display: none;">
+        <h3>Pending TON Deposits</h3>
+        <div id="deposits-list"></div>
+    </div>
+
+    <!-- SETTINGS -->
     <div id="admin-settings" class="admin-tab" style="display: none;">
         <h3>Settings</h3>
         <label>TON to Stars Rate</label>
@@ -89,6 +96,7 @@
         if(tab === 'gifts') loadAdminGifts();
         if(tab === 'roulettes') loadAdminRoulettes();
         if(tab === 'lotteries') loadAdminLotteries();
+        if(tab === 'deposits') loadAdminDeposits();
     }
 </script>
 {% endblock %}

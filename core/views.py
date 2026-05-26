@@ -1,14 +1,14 @@
 import json
 import os
 import random
+import requests
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.db.models import F
-from core.models import User, Gift, Roulette, RouletteGift, Lottery, LotteryTicket, InventoryItem, Setting
+from core.models import User, Gift, Roulette, RouletteGift, Lottery, LotteryTicket, InventoryItem, Setting, PendingDeposit
 from core.decorators import telegram_auth_required
-from core.ton_verify import verify_ton_transaction
 
 ADMIN_IDS = [int(id.strip()) for id in os.getenv("ADMIN_IDS", "").split(',') if id.strip()]
 
@@ -46,7 +46,6 @@ def auth_user(request):
 
 @csrf_exempt
 @telegram_auth_required
-@transaction.atomic
 def deposit_ton(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -57,29 +56,43 @@ def deposit_ton(request):
         if amount_ton <= 0 or not boc:
             return JsonResponse({'error': 'Invalid amount or missing transaction BOC'}, status=400)
 
-        amount_nano = int(amount_ton * 1e9)
-        admin_address = "UQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJKZ"
+        PendingDeposit.objects.create(
+            user=user,
+            amount_ton=amount_ton,
+            boc=boc
+        )
+        return JsonResponse({'success': True})
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-        if not verify_ton_transaction(boc, admin_address, amount_nano):
-            return JsonResponse({'error': 'Blockchain verification failed. Invalid transaction.'}, status=400)
+@csrf_exempt
+@telegram_auth_required
+def create_stars_invoice(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        stars_amount = int(data.get('amount', 50))
 
-        rate_setting = Setting.objects.filter(key='ton_to_stars_rate').first()
-        rate = float(rate_setting.value) if rate_setting else 1000.0
+        bot_token = os.getenv('BOT_TOKEN')
+        if not bot_token:
+            return JsonResponse({'error': 'Bot token not configured'}, status=500)
 
-        stars_to_credit = int(amount_ton * rate)
+        payload = {
+            'title': 'Top up Stars',
+            'description': f'Top up your TopGift balance with {stars_amount} Stars',
+            'payload': f'topup_{request.tg_user.telegram_id}_{stars_amount}',
+            'provider_token': '',
+            'currency': 'XTR',
+            'prices': [{'label': 'Stars', 'amount': stars_amount}]
+        }
 
-        user = User.objects.select_for_update().get(id=user.id)
-        user.ton_balance = F('ton_balance') + amount_ton
-        user.stars_balance = F('stars_balance') + stars_to_credit
-        user.save()
-        user.refresh_from_db()
-
-        return JsonResponse({
-            'success': True,
-            'new_ton': user.ton_balance,
-            'new_stars': user.stars_balance,
-            'credited_stars': stars_to_credit
-        })
+        try:
+            r = requests.post(f'https://api.telegram.org/bot{bot_token}/createInvoiceLink', json=payload)
+            resp_data = r.json()
+            if resp_data.get('ok'):
+                return JsonResponse({'success': True, 'invoice_link': resp_data['result']})
+            else:
+                return JsonResponse({'error': resp_data.get('description', 'Failed to create invoice')}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 @csrf_exempt
@@ -375,5 +388,40 @@ def admin_manage_lotteries(request):
         try:
             l = Lottery.objects.create(name=name, total_tickets=total_tickets, ticket_cost=ticket_cost, prize_id=prize_id, winners_count=winners_count, image=image)
             return JsonResponse({'success': True, 'id': l.id})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+@csrf_exempt
+@telegram_auth_required
+def admin_manage_deposits(request):
+    user = request.tg_user
+    if not get_is_admin(user.telegram_id): return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    if request.method == 'GET':
+        deposits = PendingDeposit.objects.filter(is_processed=False)
+        data = [{'id': d.id, 'user_name': d.user.name, 'amount_ton': d.amount_ton, 'boc': d.boc, 'date': d.created_at} for d in deposits]
+        return JsonResponse({'deposits': data})
+
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+        dep_id = data.get('deposit_id')
+
+        try:
+            with transaction.atomic():
+                d = PendingDeposit.objects.select_for_update().get(id=dep_id, is_processed=False)
+                d.is_processed = True
+                d.save()
+
+                target_user = User.objects.select_for_update().get(id=d.user.id)
+
+                rate_setting = Setting.objects.filter(key='ton_to_stars_rate').first()
+                rate = float(rate_setting.value) if rate_setting else 1000.0
+                stars_to_credit = int(d.amount_ton * rate)
+
+                target_user.ton_balance = F('ton_balance') + d.amount_ton
+                target_user.stars_balance = F('stars_balance') + stars_to_credit
+                target_user.save()
+
+            return JsonResponse({'success': True})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)

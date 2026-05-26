@@ -2,86 +2,86 @@
 
 {% block content %}
 <div style="padding: 20px;">
-    <h2>Admin Panel</h2>
+    <h2>Админ-панель</h2>
 
     <div style="display: flex; gap: 10px; overflow-x: auto; margin-bottom: 20px; white-space: nowrap;">
-        <button class="btn" onclick="showAdminTab('withdrawals')">Withdrawals</button>
-        <button class="btn" onclick="showAdminTab('users')">Users</button>
-        <button class="btn" onclick="showAdminTab('gifts')">Gifts</button>
-        <button class="btn" onclick="showAdminTab('roulettes')">Roulettes</button>
-        <button class="btn" onclick="showAdminTab('lotteries')">Lotteries</button>
-        <button class="btn" onclick="showAdminTab('deposits')">Deposits</button>
-        <button class="btn" onclick="showAdminTab('settings')">Settings</button>
+        <button class="btn" onclick="showAdminTab('withdrawals')">Выводы</button>
+        <button class="btn" onclick="showAdminTab('users')">Пользователи</button>
+        <button class="btn" onclick="showAdminTab('gifts')">Подарки</button>
+        <button class="btn" onclick="showAdminTab('roulettes')">Рулетки</button>
+        <button class="btn" onclick="showAdminTab('lotteries')">Лотереи</button>
+        <button class="btn" onclick="showAdminTab('deposits')">Пополнения</button>
+        <button class="btn" onclick="showAdminTab('settings')">Настройки</button>
     </div>
 
     <!-- WITHDRAWALS -->
     <div id="admin-withdrawals" class="admin-tab">
-        <h3>Pending Withdrawals</h3>
+        <h3>Заявки на вывод</h3>
         <div id="withdrawals-list"></div>
     </div>
 
     <!-- USERS -->
     <div id="admin-users" class="admin-tab" style="display: none;">
-        <h3>Users</h3>
+        <h3>Пользователи</h3>
         <div id="users-list"></div>
     </div>
 
     <!-- GIFTS -->
     <div id="admin-gifts" class="admin-tab" style="display: none;">
-        <h3>Gifts</h3>
+        <h3>База подарков</h3>
         <div class="card" style="margin-bottom: 20px; text-align: left;">
-            <h4>Create Gift</h4>
-            <input type="text" id="gift-name" placeholder="Name">
-            <input type="number" id="gift-dprice" placeholder="Display Price (Stars)">
-            <input type="number" id="gift-sprice" placeholder="Sell Price (Stars)">
+            <h4>Создать подарок</h4>
+            <input type="text" id="gift-name" placeholder="Название">
+            <input type="number" id="gift-dprice" placeholder="Цена отображаемая (Звёзды)">
+            <input type="number" id="gift-sprice" placeholder="Цена продажи (Звёзды)">
             <input type="file" id="gift-img">
-            <button class="btn btn-accent" onclick="createGift()">Create</button>
+            <button class="btn btn-accent" onclick="createGift()">Создать</button>
         </div>
         <div id="gifts-list" class="grid"></div>
     </div>
 
     <!-- ROULETTES -->
     <div id="admin-roulettes" class="admin-tab" style="display: none;">
-        <h3>Roulettes</h3>
+        <h3>Настройка рулеток</h3>
         <div class="card" style="margin-bottom: 20px; text-align: left;">
-            <h4>Create Roulette</h4>
-            <input type="text" id="r-name" placeholder="Name">
-            <input type="number" id="r-cost" placeholder="Spin Cost">
+            <h4>Создать рулетку</h4>
+            <input type="text" id="r-name" placeholder="Название">
+            <input type="number" id="r-cost" placeholder="Цена прокрута">
             <div id="r-gift-selector" style="max-height: 150px; overflow-y: auto; margin-bottom: 10px; border: 1px solid #444; padding: 5px;">
                 <!-- Filled via JS -->
             </div>
-            <button class="btn btn-accent" onclick="createRoulette()">Create</button>
+            <button class="btn btn-accent" onclick="createRoulette()">Создать</button>
         </div>
         <div id="roulettes-list"></div>
     </div>
 
     <!-- LOTTERIES -->
     <div id="admin-lotteries" class="admin-tab" style="display: none;">
-        <h3>Lotteries</h3>
+        <h3>Настройка лотерей</h3>
         <div class="card" style="margin-bottom: 20px; text-align: left;">
-            <h4>Create Lottery</h4>
-            <input type="text" id="l-name" placeholder="Name">
-            <input type="number" id="l-total" placeholder="Total Tickets">
-            <input type="number" id="l-cost" placeholder="Ticket Cost">
+            <h4>Создать лотерею</h4>
+            <input type="text" id="l-name" placeholder="Название">
+            <input type="number" id="l-total" placeholder="Всего билетов">
+            <input type="number" id="l-cost" placeholder="Цена билета">
             <select id="l-prize"><!-- Filled via JS --></select>
             <input type="file" id="l-img">
-            <button class="btn btn-accent" onclick="createLottery()">Create</button>
+            <button class="btn btn-accent" onclick="createLottery()">Создать</button>
         </div>
         <div id="lotteries-list"></div>
     </div>
 
-    <!-- SETTINGS -->
+    <!-- DEPOSITS -->
     <div id="admin-deposits" class="admin-tab" style="display: none;">
-        <h3>Pending TON Deposits</h3>
+        <h3>Ожидающие пополнения TON</h3>
         <div id="deposits-list"></div>
     </div>
 
     <!-- SETTINGS -->
     <div id="admin-settings" class="admin-tab" style="display: none;">
-        <h3>Settings</h3>
-        <label>TON to Stars Rate</label>
-        <input type="number" id="setting-rate" placeholder="e.g. 1 TON = 1000 Stars">
-        <button class="btn btn-accent" onclick="saveSettings()">Save</button>
+        <h3>Настройки</h3>
+        <label>Курс обмена TON -> Звёзды</label>
+        <input type="number" id="setting-rate" placeholder="напр. 1 TON = 1000 Stars">
+        <button class="btn btn-accent" onclick="saveSettings()">Сохранить</button>
     </div>
 </div>
 

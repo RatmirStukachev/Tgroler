@@ -41,7 +41,7 @@ async function authenticateUser() {
         if(currentUser.is_admin) {
             const nav = document.querySelector('.bottom-nav');
             if(nav && !document.getElementById('nav-admin')) {
-                nav.innerHTML += `<a href="/admin-panel/" id="nav-admin" class="nav-item">Admin</a>`;
+                nav.innerHTML += `<a href="/admin-panel/" id="nav-admin" class="nav-item">Админка</a>`;
             }
         }
 
@@ -149,7 +149,7 @@ async function spinRoulette() {
                 wheel.innerText = '🎉';
 
                 setTimeout(() => {
-                    resEl.innerText = `You won: ${escapeHTML(data.won_gift)}! 🎉`;
+                    resEl.innerText = `Вы выиграли: ${escapeHTML(data.won_gift)}! 🎉`;
                     resEl.style.color = "lime";
                     currentUser.stars_balance = data.new_balance;
                     updateUI();
@@ -160,7 +160,7 @@ async function spinRoulette() {
 
     } catch(e) {
         setTimeout(() => {
-            resEl.innerText = "Error spinning";
+            resEl.innerText = "Ошибка при прокруте";
             resEl.style.color = "red";
             btn.disabled = false;
             wheel.innerText = '❌';
@@ -173,7 +173,7 @@ async function loadInventory() {
     const grid = document.getElementById('inventory-grid');
     if(!grid) return;
 
-    grid.innerHTML = "Loading...";
+    grid.innerHTML = "Загрузка...";
     try {
         const res = await fetch('/api/inventory/', { headers: getAuthHeaders() });
         const data = await res.json();
@@ -183,13 +183,13 @@ async function loadInventory() {
             let btns = '';
             if(item.status === 'in_inventory') {
                 btns = `
-                    <button class="btn btn-accent" onclick="sellItem(${item.id})">Sell (${item.sell_price}⭐)</button>
-                    <button class="btn" onclick="withdrawItem(${item.id})">Withdraw</button>
+                    <button class="btn btn-accent" onclick="sellItem(${item.id})">Продать (${item.sell_price}⭐)</button>
+                    <button class="btn" onclick="withdrawItem(${item.id})">Вывести</button>
                 `;
             } else if (item.status === 'withdraw_pending') {
-                btns = `<p style="color:orange;">Withdraw Pending...</p>`;
+                btns = `<p style="color:orange;">В процессе вывода...</p>`;
             } else {
-                btns = `<p style="color:lime;">Withdrawn</p>`;
+                btns = `<p style="color:lime;">Выведен</p>`;
             }
 
             grid.innerHTML += `
@@ -204,7 +204,7 @@ async function loadInventory() {
 }
 
 async function sellItem(id) {
-    if(!confirm("Sell this item?")) return;
+    if(!confirm("Продать этот предмет?")) return;
     try {
         const res = await fetch('/api/sell/', {
             method: 'POST',
@@ -216,12 +216,12 @@ async function sellItem(id) {
             currentUser.stars_balance = data.new_balance;
             updateUI();
             loadInventory();
-        } else { alert(data.error); }
+        } else { tg.showAlert(data.error); }
     } catch(e) { console.error(e); }
 }
 
 async function withdrawItem(id) {
-    if(!confirm("Withdraw this item?")) return;
+    if(!confirm("Запросить вывод этого предмета?")) return;
     try {
         const res = await fetch('/api/withdraw/', {
             method: 'POST',
@@ -231,8 +231,8 @@ async function withdrawItem(id) {
         const data = await res.json();
         if(data.success) {
             loadInventory();
-            tg.showAlert("Withdrawal requested! Admin will process it soon.");
-        } else { alert(data.error); }
+            tg.showAlert("Запрос на вывод отправлен! Администратор скоро его обработает.");
+        } else { tg.showAlert(data.error); }
     } catch(e) { console.error(e); }
 }
 
@@ -241,15 +241,15 @@ async function loadLotteries() {
     const list = document.getElementById('lottery-list');
     if(!list) return;
 
-    list.innerHTML = "Loading...";
+    list.innerHTML = "Загрузка...";
     try {
         const res = await fetch('/api/lotteries/', { headers: getAuthHeaders() });
         const data = await res.json();
 
         list.innerHTML = '';
         data.lotteries.forEach(l => {
-            const statusStr = l.is_finished ? "Finished" : `${l.sold}/${l.total} tickets sold`;
-            const btnStr = l.is_finished ? `<button class="btn" disabled>Finished</button>` : `<button class="btn btn-accent" onclick="buyTicket(${l.id})">Buy Ticket (${l.cost}⭐)</button>`;
+            const statusStr = l.is_finished ? "Завершена" : `Продано: ${l.sold} / ${l.total}`;
+            const btnStr = l.is_finished ? `<button class="btn" disabled>Завершена</button>` : `<button class="btn btn-accent" onclick="buyTicket(${l.id})">Купить билет (${l.cost}⭐)</button>`;
 
             list.innerHTML += `
                 <div class="card" style="margin-bottom: 15px; text-align: left; display:flex; align-items:center;">
@@ -276,8 +276,8 @@ async function buyTicket(id) {
             currentUser.stars_balance = data.new_balance;
             updateUI();
             loadLotteries();
-            tg.showAlert("Ticket purchased!");
-        } else { alert(data.error); }
+            tg.showAlert("Билет куплен!");
+        } else { tg.showAlert(data.error); }
     } catch(e) { console.error(e); }
 }
 
@@ -286,7 +286,7 @@ async function loadAdminWithdrawals() {
     const list = document.getElementById('withdrawals-list');
     if(!list) return;
 
-    list.innerHTML = "Loading...";
+    list.innerHTML = "Загрузка...";
     try {
         const res = await fetch('/api/admin/withdrawals/', { headers: getAuthHeaders() });
         const data = await res.json();
@@ -294,14 +294,14 @@ async function loadAdminWithdrawals() {
         list.innerHTML = '';
         if(data.error) { list.innerHTML = escapeHTML(data.error); return; }
 
-        if(data.withdrawals.length === 0) { list.innerHTML = "No pending withdrawals."; }
+        if(data.withdrawals.length === 0) { list.innerHTML = "Нет заявок на вывод."; }
 
         data.withdrawals.forEach(w => {
             list.innerHTML += `
                 <div class="card" style="margin-bottom: 10px; border: 1px solid #333;">
-                    <p><strong>Item:</strong> ${escapeHTML(w.gift_name)}</p>
-                    <p><strong>User:</strong> ${escapeHTML(w.user_name)} (ID: ${w.user_tg_id})</p>
-                    <button class="btn btn-accent" onclick="fulfillWithdrawal(${w.id})">Mark as Fulfilled</button>
+                    <p><strong>Предмет:</strong> ${escapeHTML(w.gift_name)}</p>
+                    <p><strong>Пользователь:</strong> ${escapeHTML(w.user_name)} (ID: ${w.user_tg_id})</p>
+                    <button class="btn btn-accent" onclick="fulfillWithdrawal(${w.id})">Отметить как выполненный</button>
                 </div>
             `;
         });
@@ -318,7 +318,7 @@ async function fulfillWithdrawal(id) {
         const data = await res.json();
         if(data.success) {
             loadAdminWithdrawals();
-        } else { alert(data.error); }
+        } else { tg.showAlert(data.error); }
     } catch(e) { console.error(e); }
 }
 
@@ -333,7 +333,7 @@ async function saveSettings() {
             body: JSON.stringify({ action: 'update', ton_to_stars_rate: rate })
         });
         const data = await res.json();
-        if(data.success) alert("Settings saved!");
+        if(data.success) tg.showAlert("Настройки сохранены!");
     } catch(e) { console.error(e); }
 }
 
@@ -345,17 +345,17 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadAdminUsers() {
     const list = document.getElementById('users-list');
     if(!list) return;
-    list.innerHTML = "Loading...";
+    list.innerHTML = "Загрузка...";
     try {
         const res = await fetch('/api/admin/users/', { headers: getAuthHeaders() });
         const data = await res.json();
         list.innerHTML = '';
         data.users.forEach(u => {
-            const banBtn = `<button class="btn ${u.is_banned ? 'btn-accent' : 'btn-danger'}" onclick="toggleBan(${u.id}, ${!u.is_banned})">${u.is_banned ? 'Unban' : 'Ban'}</button>`;
+            const banBtn = `<button class="btn ${u.is_banned ? 'btn-accent' : 'btn-danger'}" onclick="toggleBan(${u.id}, ${!u.is_banned})">${u.is_banned ? 'Разбанить' : 'Забанить'}</button>`;
             list.innerHTML += `
                 <div class="card" style="margin-bottom: 10px; text-align:left;">
                     <p><strong>${escapeHTML(u.name)}</strong> (@${escapeHTML(u.username)})</p>
-                    <p>Stars: ${u.stars_balance} | Banned: ${u.is_banned}</p>
+                    <p>Баланс Звезд: ${u.stars_balance} | Забанен: ${u.is_banned}</p>
                     ${banBtn}
                 </div>
             `;
@@ -378,7 +378,7 @@ let cachedGifts = [];
 async function loadAdminGifts() {
     const list = document.getElementById('gifts-list');
     if(!list) return;
-    list.innerHTML = "Loading...";
+    list.innerHTML = "Загрузка...";
     try {
         const res = await fetch('/api/admin/gifts/', { headers: getAuthHeaders() });
         const data = await res.json();
@@ -389,7 +389,7 @@ async function loadAdminGifts() {
                 <div class="card">
                     ${g.image ? `<img src="${g.image}" style="max-height:80px">` : '🎁'}
                     <p>${g.name}</p>
-                    <small>Disp: ${g.display_price} | Sell: ${g.sell_price}</small>
+                    <small>Цена (отбр): ${g.display_price} | Продажа: ${g.sell_price}</small>
                 </div>
             `;
         });
@@ -402,7 +402,7 @@ async function loadAdminGifts() {
                 rSel.innerHTML += `
                     <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                         <label><input type="checkbox" class="r-gift-cb" value="${g.id}"> ${g.name}</label>
-                        <input type="number" id="r-chance-${g.id}" placeholder="Chance %" style="width: 80px; margin:0;">
+                        <input type="number" id="r-chance-${g.id}" placeholder="Шанс %" style="width: 80px; margin:0;">
                     </div>
                 `;
             });
@@ -410,7 +410,7 @@ async function loadAdminGifts() {
 
         const lPrize = document.getElementById('l-prize');
         if(lPrize) {
-            lPrize.innerHTML = '<option value="">Select Prize...</option>';
+            lPrize.innerHTML = '<option value="">Выберите приз...</option>';
             cachedGifts.forEach(g => {
                 lPrize.innerHTML += `<option value="${g.id}">${g.name}</option>`;
             });
@@ -445,7 +445,7 @@ async function createGift() {
 async function loadAdminRoulettes() {
     const list = document.getElementById('roulettes-list');
     if(!list) return;
-    list.innerHTML = "Loading...";
+    list.innerHTML = "Загрузка...";
     try {
         const res = await fetch('/api/admin/roulettes/', { headers: getAuthHeaders() });
         const data = await res.json();
@@ -454,8 +454,8 @@ async function loadAdminRoulettes() {
             const giftsStr = r.gifts.map(g => `${g.gift__name}(${g.chance}%)`).join(', ');
             list.innerHTML += `
                 <div class="card" style="margin-bottom:10px; text-align:left;">
-                    <h4>${r.name} (Cost: ${r.spin_cost}⭐)</h4>
-                    <p style="font-size:12px; color:#aaa;">Gifts: ${giftsStr}</p>
+                    <h4>${r.name} (Цена: ${r.spin_cost}⭐)</h4>
+                    <p style="font-size:12px; color:#aaa;">Подарки: ${giftsStr}</p>
                 </div>
             `;
         });
@@ -486,7 +486,7 @@ async function createRoulette() {
 async function loadAdminLotteries() {
     const list = document.getElementById('lotteries-list');
     if(!list) return;
-    list.innerHTML = "Loading...";
+    list.innerHTML = "Загрузка...";
     try {
         const res = await fetch('/api/admin/lotteries/', { headers: getAuthHeaders() });
         const data = await res.json();
@@ -495,8 +495,8 @@ async function loadAdminLotteries() {
             list.innerHTML += `
                 <div class="card" style="margin-bottom:10px; text-align:left;">
                     <h4>${l.name}</h4>
-                    <p>Total: ${l.total_tickets} | Cost: ${l.ticket_cost}⭐</p>
-                    <p>Prize: ${l.prize} | Finished: ${l.is_finished}</p>
+                    <p>Всего: ${l.total_tickets} | Цена: ${l.ticket_cost}⭐</p>
+                    <p>Приз: ${l.prize} | Завершена: ${l.is_finished}</p>
                 </div>
             `;
         });
@@ -539,14 +539,14 @@ function escapeHTML(str) {
 // --- TON DEPOSIT ---
 async function depositTON() {
     if (!tonConnectUI || !tonConnectUI.connected) {
-        tg.showAlert("Please connect your TON wallet first using the top bar button.");
+        tg.showAlert("Пожалуйста, сначала подключите ваш TON кошелек, используя кнопку на верхней панели.");
         return;
     }
 
     const amtInput = document.getElementById('deposit-amount').value;
     const amountTon = parseFloat(amtInput);
     if (!amountTon || amountTon <= 0) {
-        tg.showAlert("Enter a valid TON amount.");
+        tg.showAlert("Введите правильное количество TON.");
         return;
     }
 
@@ -580,13 +580,13 @@ async function depositTON() {
             currentUser.stars_balance = data.new_stars;
             currentUser.ton_balance = data.new_ton;
             updateUI();
-            tg.showAlert(`Successfully deposited ${amountTon} TON and received ${data.credited_stars} Stars!`);
+            tg.showAlert(`Успешно пополнено на ${amountTon} TON, заявка отправлена администратору!`);
         } else {
-            tg.showAlert("Error verifying deposit: " + data.error);
+            tg.showAlert("Ошибка при пополнении: " + data.error);
         }
     } catch (e) {
         console.error("Transaction failed or rejected", e);
-        tg.showAlert("Transaction was cancelled or failed.");
+        tg.showAlert("Транзакция отменена или завершилась с ошибкой.");
     }
 }
 
@@ -595,7 +595,7 @@ async function loadLeaderboard() {
     const list = document.getElementById('leaderboard-list');
     if (!list) return;
 
-    list.innerHTML = "Loading...";
+    list.innerHTML = "Загрузка...";
     try {
         const res = await fetch('/api/leaderboard/', { headers: getAuthHeaders() });
         const data = await res.json();
@@ -627,7 +627,7 @@ async function buyTelegramStars() {
     const amtInput = document.getElementById('tg-stars-amount').value;
     const amount = parseInt(amtInput);
     if (!amount || amount <= 0) {
-        tg.showAlert("Enter a valid Stars amount.");
+        tg.showAlert("Введите правильное количество Звёзд.");
         return;
     }
 
@@ -643,41 +643,41 @@ async function buyTelegramStars() {
             // Open the Telegram invoice link natively via the TWA API
             tg.openInvoice(data.invoice_link, (status) => {
                 if(status === 'paid') {
-                    tg.showAlert("Payment successful! Your balance will be updated.");
+                    tg.showAlert("Оплата успешна! Ваш баланс будет обновлен.");
                     // The bot webhook handles actual crediting, we can just reload auth
                     setTimeout(authenticateUser, 2000);
                 } else if(status === 'failed') {
-                    tg.showAlert("Payment failed.");
+                    tg.showAlert("Ошибка оплаты.");
                 } else if(status === 'cancelled') {
                     // Do nothing
                 }
             });
         } else {
-            tg.showAlert("Error creating invoice: " + (data.error || "Unknown"));
+            tg.showAlert("Ошибка при создании счета: " + (data.error || "Неизвестная ошибка"));
         }
     } catch(e) {
         console.error(e);
-        tg.showAlert("An error occurred.");
+        tg.showAlert("Произошла ошибка.");
     }
 }
 
 async function loadAdminDeposits() {
     const list = document.getElementById('deposits-list');
     if(!list) return;
-    list.innerHTML = "Loading...";
+    list.innerHTML = "Загрузка...";
     try {
         const res = await fetch('/api/admin/deposits/', { headers: getAuthHeaders() });
         const data = await res.json();
         list.innerHTML = '';
-        if(data.deposits.length === 0) { list.innerHTML = "No pending deposits."; }
+        if(data.deposits.length === 0) { list.innerHTML = "Нет ожидающих пополнений."; }
 
         data.deposits.forEach(d => {
             list.innerHTML += `
                 <div class="card" style="margin-bottom: 10px; text-align: left;">
-                    <p><strong>User:</strong> ${escapeHTML(d.user_name)}</p>
+                    <p><strong>Пользователь:</strong> ${escapeHTML(d.user_name)}</p>
                     <p><strong>TON:</strong> ${d.amount_ton}</p>
                     <p style="word-break: break-all; font-size:10px;">BOC: ${escapeHTML(d.boc)}</p>
-                    <button class="btn btn-accent" onclick="approveDeposit(${d.id})">Verify & Approve</button>
+                    <button class="btn btn-accent" onclick="approveDeposit(${d.id})">Проверить и подтвердить</button>
                 </div>
             `;
         });

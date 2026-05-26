@@ -45,14 +45,14 @@ def send_welcome(message):
 
     markup = InlineKeyboardMarkup()
     web_app_btn = InlineKeyboardButton(
-        text="Open TopGift 🎁",
+        text="Открыть TopGift 🎁",
         web_app=WebAppInfo(url=WEB_APP_URL)
     )
     markup.add(web_app_btn)
 
     bot.reply_to(
         message,
-        f"Welcome to TopGift, {name}! 🎁\nClick the button below to start.",
+        f"Добро пожаловать в TopGift, {name}! 🎁\nНажмите на кнопку ниже, чтобы начать.",
         reply_markup=markup
     )
 
@@ -80,10 +80,10 @@ def got_payment(message):
                     user.stars_balance = F('stars_balance') + amount
                     user.save()
 
-                bot.reply_to(message, f"🎉 Successfully added {amount} Stars to your balance!")
+                bot.reply_to(message, f"🎉 Успешно добавлено {amount} Звёзд на ваш баланс!")
             except User.DoesNotExist:
                 pass
 
 if __name__ == '__main__':
-    print("Bot is running...")
+    print("Бот запущен...")
     bot.infinity_polling()

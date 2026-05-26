@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TopGift</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <link rel="stylesheet" href="/static/core/css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header / Top Bar -->
+        <header class="top-bar">
+            <div id="ton-connect"></div>
+            <div class="balances">
+                <span class="ton-balance"><span id="user-ton-balance">0.00</span> TON</span>
+                <span class="stars-balance"><span id="user-stars-balance">0</span> ⭐</span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="content">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="/" class="nav-item {% if request.path == '/' %}active{% endif %}">Roulette</a>
+            <a href="/lottery/" class="nav-item {% if request.path == '/lottery/' %}active{% endif %}">Lottery</a>
+            <a href="/profile/" class="nav-item {% if request.path == '/profile/' %}active{% endif %}">Profile</a>
+            <!-- Admin link will be injected by JS if user is admin -->
+        </nav>
+    </div>
+
+    <script src="/static/core/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

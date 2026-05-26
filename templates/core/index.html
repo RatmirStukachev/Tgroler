@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="padding: 20px; text-align: center;">
+    <h1>Roulette</h1>
+    <div style="margin: 20px 0;">
+        <select id="roulette-selector" onchange="loadRoulette()">
+            <option value="">Select Roulette...</option>
+        </select>
+    </div>
+
+    <div id="roulette-display" class="card" style="display: none; padding: 30px;">
+        <h2 id="roulette-name"></h2>
+        <div id="roulette-wheel" style="font-size: 50px; margin: 20px 0;">🎁</div>
+        <p>Cost: <span id="roulette-cost" style="color: gold; font-weight: bold;"></span> ⭐</p>
+        <button id="spin-btn" class="btn" onclick="spinRoulette()">SPIN</button>
+    </div>
+
+    <div id="spin-result" style="margin-top: 20px; font-weight: bold; color: #007aff;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // These will be defined in app.js, loaded via APIs
+</script>
+{% endblock %}

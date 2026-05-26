@@ -1,0 +1,124 @@
+Watching for file changes with StatReloader
+[26/May/2026 16:24:22] "GET / HTTP/1.1" 200 2193
+[26/May/2026 16:24:22] "GET /static/core/css/style.css HTTP/1.1" 200 2082
+[26/May/2026 16:24:22] "GET /static/core/js/app.js HTTP/1.1" 200 10458
+[26/May/2026 16:24:23] "POST /api/auth/ HTTP/1.1" 200 144
+[26/May/2026 16:24:23] "GET /api/roulettes/ HTTP/1.1" 200 69
+[26/May/2026 16:24:24] "POST /api/spin/ HTTP/1.1" 200 65
+[26/May/2026 16:24:25] "GET /lottery/ HTTP/1.1" 200 1493
+[26/May/2026 16:24:26] "POST /api/auth/ HTTP/1.1" 200 143
+[26/May/2026 16:24:26] "GET /api/lotteries/ HTTP/1.1" 200 127
+[26/May/2026 16:24:27] "POST /api/lotteries/buy/ HTTP/1.1" 200 37
+[26/May/2026 16:24:27] "GET /api/lotteries/ HTTP/1.1" 200 127
+[26/May/2026 16:24:28] "GET /profile/ HTTP/1.1" 200 1632
+[26/May/2026 16:24:28] "POST /api/auth/ HTTP/1.1" 200 143
+[26/May/2026 16:24:28] "GET /api/inventory/ HTTP/1.1" 200 114
+/app/core/decorators.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 26, 2026 - 16:23:51
+Django version 6.0.5, using settings 'config.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.0/howto/deployment/
+Watching for file changes with StatReloader
+/app/core/models.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 26, 2026 - 16:26:07
+Django version 6.0.5, using settings 'config.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.0/howto/deployment/
+Watching for file changes with StatReloader
+/app/core/views.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 26, 2026 - 16:27:26
+Django version 6.0.5, using settings 'config.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.0/howto/deployment/
+Watching for file changes with StatReloader
+/app/config/urls.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 26, 2026 - 16:27:37
+Django version 6.0.5, using settings 'config.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.0/howto/deployment/
+Watching for file changes with StatReloader
+/app/config/settings.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 26, 2026 - 16:27:51
+Django version 6.0.5, using settings 'config.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.0/howto/deployment/
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 26, 2026 - 16:32:37
+Django version 6.0.5, using settings 'config.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.0/howto/deployment/
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 26, 2026 - 16:33:57
+Django version 6.0.5, using settings 'config.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.0/howto/deployment/
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 26, 2026 - 16:34:40
+Django version 6.0.5, using settings 'config.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.0/howto/deployment/
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 26, 2026 - 16:36:13
+Django version 6.0.5, using settings 'config.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.0/howto/deployment/
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 26, 2026 - 16:36:29
+Django version 6.0.5, using settings 'config.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.0/howto/deployment/
